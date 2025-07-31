@@ -117,7 +117,7 @@ This will create a `key.key` file in your directory.
 Use the `main.py` script to start the server and the keylogger simultaneously.
 
 ```bash
-python launcher.py
+python main.py
 ```
 This will start the Flask server and then the keylogger as background processes. You will see status messages confirming that both have been launched. The project is now active and capturing data.
 
