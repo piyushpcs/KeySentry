@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
 """
 keygen.py — Generates a Fernet encryption key and securely saves it to a file.
-
 Used by the keylogger to encrypt captured keystrokes.
 """
 
