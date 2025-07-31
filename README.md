@@ -5,15 +5,15 @@
 
 **🔴 Disclaimer: This tool is intended for educational and ethical research purposes only. Using this software to monitor a computer system without the explicit authorization of its owner is illegal. The author is not responsible for any damage or misuse of this software.**
 
-### Project Overview
+## Project Overview
 
 KeySentry is a proof-of-concept (PoC) keylogger developed to demonstrate the end-to-end lifecycle of a data capture attack. The project's core logic is organized into a clean Python package for maintainability. It showcases keystroke capture (`pynput`), real-time AES encryption (`cryptography`), and simulated data exfiltration to a local Flask server. The entire system is designed for ease of use, allowing it to be started with a single command.
 
 ## Project Structure
 
 The project uses a standard package structure to keep the codebase organized:
-Use code with caution.
-Markdown
+
+```
 KeySentry/
 ├── keysentry/ # The main Python package
 │ ├── init.py # Makes 'keysentry' a package
@@ -25,9 +25,32 @@ KeySentry/
 ├── requirements.txt
 ├── README.md
 └── .gitignore
-Generated code
+```
+## Project Flowchart
 
-### Features
+This diagram illustrates how the different scripts in the project interact with each other.
+
+```
+┌────────────────┐     ┌───────────┐     ┌────────────────┐
+│   keygen.py    ├────►│  key.key  │◄────┤   decrypt.py   │
+└────────────────┘     └───────────┘     └────────────────┘
+                           ▲                      ▲
+                           │                      │
+┌────────────────┐         │                ┌──────────────┐
+│  keylogger.py  ├─────────┘                │ .keylog.txt  │
+└────────────────┘                          └──────────────┘
+       │     │                                    ▲
+       │     └────────────────────────────────────┘
+       │                      (Writes encrypted, base64-encoded logs)
+       │
+       │ (Sends encrypted data via HTTP POST)
+       ▼
+┌────────────────┐     ┌────────────────┐
+│    server.py   ├────►│ received_logs/ │
+└────────────────┘     └────────────────┘
+```
+
+## Features
 
 -   🚀 **One-Command Launcher**: The top-level `start.py` script starts and gracefully stops all components (server and keylogger) with a single command.
 -   📦 **Packaged Codebase**: Core logic is neatly organized into the `keysentry` package, promoting code reusability and maintainability.
@@ -58,48 +81,39 @@ pip install -r requirements.txt
 ```
 Use code with caution.
 
-3. How to Run the Project
+### 3. How to Run the Project
 
 The entire project is controlled from the root KeySentry/ directory.
 
-### Step 1: Generate the Encryption Key
+#### Step 1: Generate the Encryption Key
 
 Run the keygen module from within the keysentry package using Python's -m flag. This only needs to be done once.
 
  ```bash
 python -m keysentry.keygen
 ```
-Use code with caution.
-Bash
 This will create a key.key file in the root directory.
 
 ### Step 2: Launch the Entire Project
 
 Use the start.py script from the root directory to run the server and keylogger simultaneously.
 
-
 ```bash
 python start.py
 ```
-Use code with caution.
-Bash
-
 This will start the Flask server and the keylogger as background processes. The project is now active and capturing data.
 To stop everything, simply press Ctrl+C in the terminal where the launcher is running.
 
 ### Step 3: Decrypt and View Local Logs
 
 After stopping the project, you can decrypt the locally stored log file using the decrypt module.
-Generated 
+
 ```bash
 python -m keysentry.decrypt
 ```
-Use code with caution.
-Bash
-
 This will print the decrypted, timestamped keystrokes to your terminal, verifying that the entire process worked correctly.
 
-### Ethical Use
+## Ethical Use
 
 This project is published for educational purposes only. It demonstrates concepts that are often used in malware, but it is provided to help developers and security professionals understand and defend against such threats.
 
