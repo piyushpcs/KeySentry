@@ -1,4 +1,4 @@
-# Simulated exfiltration server for receiving encrypted keylogs via POST
+#Simulated exfiltration server for receiving encrypted keylogs via POST
 
 from flask import Flask, request
 from datetime import datetime
