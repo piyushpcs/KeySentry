@@ -1,5 +1,5 @@
 key.key
-keylog.txt
+.keylog.txt
 __pycache__/
 venv/
 
