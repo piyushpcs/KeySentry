@@ -119,6 +119,7 @@ Use the `start.py` script from the root directory to run the server and keylogge
 
 ```bash
 python start.py
+```
 
 This will print the decrypted, timestamped keystrokes to your terminal, verifying that the entire process worked correctly.
 
