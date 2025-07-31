@@ -14,7 +14,7 @@ This project is a proof-of-concept (PoC) demonstrating a keylogger with a comple
 4.  **Local & Remote Logging**: Stores logs locally and simulates exfiltration to a remote server.
 5.  **Decryption Utility**: Provides a tool to decrypt and view the captured logs.
 
-The goal is to provide a clear, hands-on understanding of the mechanics behind data capture, encryption, and exfiltration for cybersecurity students, developers, and ethical hackers.
+The goal is to provide a clear, hands-on understanding of the mechanics behind data capture, encryption, and exfiltration for cybersecurity students, developers, and ethical hackers. The project is designed for ease of use, allowing the entire system to be started with a single command.
 
 ## Project Flowchart
 
@@ -42,6 +42,7 @@ This diagram illustrates how the different scripts in the project interact with 
 
 ## Features
 
+-   🚀 **One-Command Launcher**: A convenient launcher script (`main.py`) starts and gracefully stops all components (server and keylogger) with a single command.
 -   🔐 **Secure Key Generation**: Uses `cryptography.fernet` to generate a key and sets file permissions to `600` (owner read/write only) for security.
 -   ⌨️ **Real-time Keystroke Logging**: Captures both alphanumeric characters and special keys (e.g., `[space]`, `[ctrl]`) using `pynput`.
 -   🛡️ **Strong Encryption**: Encrypts every log entry with a timestamp using a symmetric Fernet (AES) key.
@@ -49,7 +50,7 @@ This diagram illustrates how the different scripts in the project interact with 
     -   **Local**: Saves encrypted and base64-encoded logs to a hidden file (`.keylog.txt`).
     -   **Remote**: Simulates data exfiltration by sending encrypted logs to a Flask server via HTTP POST.
 -   🚀 **Simulated C2 Server**: A simple Flask server that listens for incoming logs and saves them to a `received_logs` directory.
--   🛑 **Clean Kill Switch**: The keylogger can be safely terminated by pressing the `Esc` key.
+-   🛑 **Clean Kill Switch**: The keylogger can be safely terminated by pressing the `Esc` key, or through the main launcher's `Ctrl+C` command.
 -   🔓 **Decryption Utility**: A standalone script (`decrypt.py`) to read, decode, and display the contents of the local log file.
 
 ---
@@ -93,11 +94,14 @@ key.key
 *.key
 .keylog.txt
 received_logs/
+
+# Virtual environment
+venv/
 ```
 
 ### 3. How to Run the Project
 
-The simulation requires running the **server** and the **keylogger** in two separate terminal windows.
+The entire project can now be controlled from a single terminal.
 
 #### Step 1: Generate the Encryption Key
 
@@ -108,29 +112,20 @@ python keygen.py
 ```
 This will create a `key.key` file in your directory.
 
-#### Step 2: Start the Exfiltration Server
+#### Step 2: Launch the Entire Project
 
-In your **first terminal**, start the Flask server. It will listen for incoming data from the keylogger.
-
-```bash
-python server.py
-```
-You should see a message indicating the server is running on `http://127.0.0.1:5000`.
-
-#### Step 3: Run the Keylogger
-
-In your **second terminal**, start the keylogger.
+Use the `main.py` script to start the server and the keylogger simultaneously.
 
 ```bash
-python keylogger.py
+python launcher.py
 ```
-The keylogger is now active. Every key you type will be encrypted and sent to your server. Check the server's terminal window to see real-time updates as it receives logs.
+This will start the Flask server and then the keylogger as background processes. You will see status messages confirming that both have been launched. The project is now active and capturing data.
 
-To stop the keylogger, press the **`Esc`** key.
+To stop everything, simply press **`Ctrl+C`** in the terminal where the launcher is running. It will gracefully terminate both the server and the keylogger.
 
-#### Step 4: Decrypt and View Local Logs
+#### Step 3: Decrypt and View Local Logs
 
-After you have stopped the keylogger, you can decrypt the locally stored log file (`.keylog.txt`) using the `decrypt.py` script.
+After you have stopped the project, you can decrypt the locally stored log file (`.keylog.txt`) using the `decrypt.py` script.
 
 ```bash
 python decrypt.py
