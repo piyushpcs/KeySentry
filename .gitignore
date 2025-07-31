@@ -2,4 +2,4 @@ key.key
 .keylog.txt
 __pycache__/
 venv/
-
+received_logs/
