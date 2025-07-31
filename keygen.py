@@ -1,7 +1,5 @@
-"""
-keygen.py — Generates a Fernet encryption key and securely saves it to a file.
-Used by the keylogger to encrypt captured keystrokes.
-"""
+# Generates a Fernet encryption key and securely saves it to a file.
+# Used by the keylogger to encrypt captured keystrokes.
 
 import os
 import stat
@@ -53,7 +51,7 @@ def main():
         return
 
     print(f"✅ Encryption key generated and saved to '{args.output}'")
-    print("🔒 Permissions set to 600 (owner read/write only)")
+    print("Permissions set to 600 (owner read/write only)")
 
 if __name__ == "__main__":
     main()
