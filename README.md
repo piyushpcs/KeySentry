@@ -110,7 +110,8 @@ The entire project is controlled from the root `KeySentry/` directory.
 Run the `keygen` module from within the `keysentry` package using Python's `-m` flag. This only needs to be done once.
 
 ```bash
-python -m keysentry.keygen```
+python -m keysentry.keygen
+```
 This will create a `key.key` file in the root directory.
 
 #### Step 2: Launch the Entire Project
