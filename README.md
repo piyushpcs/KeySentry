@@ -42,7 +42,8 @@ This diagram illustrates how the different scripts in the project interact with 
 
 ## Features
 
--   🚀 **One-Command Launcher**: A convenient launcher script (`main.py`) starts and gracefully stops all components (server and keylogger) with a single command.
+-   🚀 **One-Command Launcher**: The top-level `start.py` script starts and gracefully stops all components (server and keylogger) with a single command.
+-   📦 **Packaged Codebase**: Core logic is neatly organized into the `keysentry` package, promoting code reusability and maintainability.
 -   🔐 **Secure Key Generation**: Uses `cryptography.fernet` to generate a key and sets file permissions to `600` (owner read/write only) for security.
 -   ⌨️ **Real-time Keystroke Logging**: Captures both alphanumeric characters and special keys (e.g., `[space]`, `[ctrl]`) using `pynput`.
 -   🛡️ **Strong Encryption**: Encrypts every log entry with a timestamp using a symmetric Fernet (AES) key.
@@ -99,37 +100,26 @@ received_logs/
 venv/
 ```
 
+
 ### 3. How to Run the Project
 
-The entire project can now be controlled from a single terminal.
+The entire project is controlled from the root `KeySentry/` directory.
 
 #### Step 1: Generate the Encryption Key
 
-In your terminal, run the `keygen.py` script. This only needs to be done once.
+Run the `keygen` module from within the `keysentry` package using Python's `-m` flag. This only needs to be done once.
 
 ```bash
-python keygen.py
-```
-This will create a `key.key` file in your directory.
+python -m keysentry.keygen```
+This will create a `key.key` file in the root directory.
 
 #### Step 2: Launch the Entire Project
 
-Use the `main.py` script to start the server and the keylogger simultaneously.
+Use the `start.py` script from the root directory to run the server and keylogger simultaneously.
 
 ```bash
-python main.py
-```
-This will start the Flask server and then the keylogger as background processes. You will see status messages confirming that both have been launched. The project is now active and capturing data.
+python start.py
 
-To stop everything, simply press **`Ctrl+C`** in the terminal where the launcher is running. It will gracefully terminate both the server and the keylogger.
-
-#### Step 3: Decrypt and View Local Logs
-
-After you have stopped the project, you can decrypt the locally stored log file (`.keylog.txt`) using the `decrypt.py` script.
-
-```bash
-python decrypt.py
-```
 This will print the decrypted, timestamped keystrokes to your terminal, verifying that the entire process worked correctly.
 
 ## Ethical Use
