@@ -5,8 +5,8 @@ import time
 # --- Configuration ---
 # Use sys.executable to ensure we use the same python interpreter
 PYTHON_EXECUTABLE = sys.executable
-SERVER_SCRIPT = "server.py"
-KEYLOGGER_SCRIPT = "keylogger.py"
+SERVER_SCRIPT = "keysentry/server.py"
+KEYLOGGER_SCRIPT = "keysentry/keylogger.py"
 
 def main():
     """
