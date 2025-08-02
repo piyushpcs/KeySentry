@@ -6,7 +6,7 @@ import time
 # Use sys.executable to ensure we use the same python interpreter
 PYTHON_EXECUTABLE = sys.executable
 SERVER_SCRIPT = "keysentry/dashboard.py"
-KEYLOGGER_SCRIPT = "keysentry/dashboard.py"
+KEYLOGGER_SCRIPT = "keysentry/keylogger.py"
 
 def main():
     """
