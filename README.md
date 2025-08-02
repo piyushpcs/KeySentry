@@ -18,10 +18,10 @@ KeySentry/
 ├── keysentry/ # The main Python package
 │ ├── init.py # Makes 'keysentry' a package
 │ ├── keylogger.py
-│ ├── server.py
+│ ├── dashboard.py
 │ ├── decrypt.py
 │ └── keygen.py
-├── start.py # The main launcher script
+├── launcher.py # The main launcher script
 ├── requirements.txt
 ├── README.md
 └── .gitignore
@@ -46,7 +46,7 @@ This diagram illustrates how the different scripts in the project interact with 
        │ (Sends encrypted data via HTTP POST)
        ▼
 ┌────────────────┐     ┌────────────────┐
-│    server.py   ├────►│ received_logs/ │
+│    dashboard.py   ├────►│ received_logs/ │
 └────────────────┘     └────────────────┘
 ```
 
@@ -99,7 +99,7 @@ This will create a key.key file in the root directory.
 Use the start.py script from the root directory to run the server and keylogger simultaneously.
 
 ```bash
-python start.py
+python launcher.py
 ```
 This will start the Flask server and the keylogger as background processes. The project is now active and capturing data.
 To stop everything, simply press Ctrl+C in the terminal where the launcher is running.
