@@ -5,23 +5,22 @@
 
 **🔴 Disclaimer: This tool is intended for educational and ethical research purposes only. Using this software to monitor a computer system without the explicit authorization of its owner is illegal. The author is not responsible for any damage or misuse of this software.**
 
+---
+
 ## Project Overview
 
-KeySentry is a proof-of-concept (PoC) keylogger developed to demonstrate the end-to-end lifecycle of a data capture attack. The project's core logic is organized into a clean Python package for maintainability. It showcases keystroke capture (`pynput`), real-time AES encryption (`cryptography`), and simulated data exfiltration to a local Flask server. The entire system is designed for ease of use, allowing it to be started with a single command.
+KeySentry is a proof-of-concept (PoC) keylogger developed to demonstrate the end-to-end lifecycle of a data capture attack. The project's core logic is organized into a clean Python package for maintainability. It showcases keystroke capture (`pynput`), real-time AES encryption (`cryptography`), and simulated data exfiltration to a local Flask server.
 
 ## Project Structure
-
-The project uses a standard package structure to keep the codebase organized:
-
 ```
 KeySentry/
-├── keysentry/ # The main Python package
-│ ├── init.py # Makes 'keysentry' a package
-│ ├── keylogger.py
-│ ├── dashboard.py
-│ ├── decrypt.py
-│ └── keygen.py
-├── launcher.py # The main launcher script
+├── keysentry/              # The main Python package
+│   ├── __init__.py         # Makes 'keysentry' a package
+│   ├── keylogger.py
+│   ├── dashboard.py
+│   ├── decrypt.py
+│   └── keygen.py
+├── launcher.py             # The main launcher script
 ├── requirements.txt
 ├── README.md
 └── .gitignore
@@ -29,101 +28,95 @@ KeySentry/
 ## Project Flowchart
 
 This diagram illustrates how the different scripts in the project interact with each other.
-
 ```
-┌────────────────┐     ┌───────────┐     ┌────────────────┐
-│   keygen.py    ├────►│  key.key  │◄────┤   decrypt.py   │
-└────────────────┘     └───────────┘     └────────────────┘
-                           ▲                      ▲
-                           │                      │
-┌────────────────┐         │                ┌──────────────┐
-│  keylogger.py  ├─────────┘                │ .keylog.txt  │
-└────────────────┘                          └──────────────┘
-       │     │                                    ▲
-       │     └────────────────────────────────────┘
-       │                      (Writes encrypted, base64-encoded logs)
+┌────────────────┐      ┌───────────┐      ┌────────────────┐
+│   keygen.py    ├─────►│  key.key  │◄─────┤   decrypt.py   │
+└────────────────┘      └───────────┘      └────────────────┘
+                            ▲                       ▲
+                            │                       │
+┌────────────────┐          │                 ┌──────────────┐
+│  keylogger.py  ├──────────┘                 │ .keylog.txt  │
+└────────────────┘                            └──────────────┘
+       │      │                                     ▲
+       │      └─────────────────────────────────────┘
+       │                       (Writes encrypted, base64-encoded logs)
        │
        │ (Sends encrypted data via HTTP POST)
        ▼
-┌────────────────┐     ┌────────────────┐
-│    dashboard.py   ├────►│ received_logs/ │
-└────────────────┘     └────────────────┘
+┌────────────────┐      ┌──────────────────┐
+│  dashboard.py  ├─────►│ received_logs/IP │
+└────────────────┘      └──────────────────┘
 ```
-
 ## Features
 
--   🚀 **One-Command Launcher**: The top-level `start.py` script starts and gracefully stops all components (server and keylogger) with a single command.
--   📦 **Packaged Codebase**: Core logic is neatly organized into the `keysentry` package, promoting code reusability and maintainability.
--   🔐 **Secure Key Generation**: Uses `cryptography.fernet` to generate a key and sets file permissions to `600` (owner read/write only) for security.
--   ⌨️ **Real-time Keystroke Logging**: Captures both alphanumeric characters and special keys using `pynput`.
--   🛡️ **Strong Encryption**: Encrypts every log entry with a timestamp using a symmetric Fernet (AES) key.
--   💾 **Dual Logging Mechanism**: Stores encrypted logs both locally and remotely via simulated exfiltration.
--   🛑 **Clean Kill Switch**: The project can be safely terminated via `Ctrl+C` in the launcher terminal.
--   🔓 **Decryption Utility**: A standalone script to decrypt and view the captured logs.
+-   🚀 **Modular Design**: Core logic is neatly organized into the `keysentry` package.
+-   🔐 **Secure Key Generation**: Uses `cryptography.fernet` (AES) and sets file permissions to `600` (owner read/write only).
+-   ⌨️ **Real-time Keystroke Logging**: Captures alphanumeric and special keys using `pynput`.
+-   🛡️ **Strong Encryption**: Encrypts every log entry with a timestamp before saving or sending.
+-   💾 **Exfiltration Simulation**: Sends encrypted logs to a local Flask C2 server on Port 5001.
+-   🛑 **Clean Kill Switch**: Handles `SIGINT` (Ctrl+C) gracefully to flush buffers before exiting.
 
 ---
 
 ## Getting Started
 
-Follow these instructions to get the project running on your local machine.
-
 ### 1. Prerequisites
-
 -   Python 3.x
--   Clone the repository and navigate into the root directory.
+-   Clone the repository:
+    ```bash
+    git clone [https://github.com/piyushpcs/KeySentry.git](https://github.com/piyushpcs/KeySentry.git)
+    cd KeySentry
+    ```
 
 ### 2. Installation
-
-Install the required dependencies from the `requirements.txt` file.
+Create a virtual environment and install dependencies:
 
 ```bash
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```
-Use code with caution.
-
-### 3. How to Run the Project
-
-The entire project is controlled from the root KeySentry/ directory.
-
-#### Step 1: Generate the Encryption Key
-
-Run the keygen module from within the keysentry package using Python's -m flag. This only needs to be done once.
-
- ```bash
-python -m keysentry.keygen
+### 3. Generate Encryption Key
+Run this once to create the key.key file:
 ```
-This will create a key.key file in the root directory.
-
-### Step 2: Launch the Entire Project
-
-Use the start.py script from the root directory to run the server and keylogger simultaneously.
-
-```bash
-python launcher.py
+python3 -m keysentry.keygen
 ```
-This will start the Flask server and the keylogger as background processes. The project is now active and capturing data.
-To stop everything, simply press Ctrl+C in the terminal where the launcher is running.
+---
 
-### Step 3: Decrypt and View Local Logs
+## 🚀 How to Run the Project
+Option A: macOS (Recommended)
+Due to macOS "Input Monitoring" security restrictions, you must run the server and keylogger in two separate terminal windows.
 
-After stopping the project, you can decrypt the locally stored log file using the decrypt module.
-
-```bash
-python -m keysentry.decrypt
+Terminal 1 (The C2 Server):
 ```
-This will print the decrypted, timestamped keystrokes to your terminal, verifying that the entire process worked correctly.
+source venv/bin/activate
+python3 keysentry/dashboard.py
+```
+Terminal 2 (The Keylogger):
+```
+source venv/bin/activate
+python3 keysentry/keylogger.py
+```
+Note: You must grant "Input Monitoring" permission to Terminal in System Settings > Privacy & Security. If it fails, restart Terminal.
 
+Option B: Linux / Windows
+You can use the automated launcher to start both processes at once:
+```
+python3 launcher.py
+```
+### 🔓 Decrypting Logs
+The server organizes logs by IP address in the received_logs directory. To decrypt them:
+```
+# Syntax: python -m keysentry.decrypt <path_to_log_folder>
+python3 -m keysentry.decrypt received_logs/127.0.0.1
+```
+---
 ## Ethical Use
+✅ DO use this code on systems you own and have explicit permission to test on.
 
-This project is published for educational purposes only. It demonstrates concepts that are often used in malware, but it is provided to help developers and security professionals understand and defend against such threats.
+❌ DO NOT deploy this on any system without permission.
 
--  ✅ DO use this code on systems you own and have explicit permission to test on.
--  ✅ DO use this to learn about process monitoring, encryption, and data transmission.
--  ❌ DO NOT deploy this on any system without permission.
--  ❌ DO NOT use this for any malicious or illegal activities.
+❌ DO NOT use this for any malicious or illegal activities.
 
-Responsible disclosure and ethical boundaries are paramount.
-
-### License
-
+License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
